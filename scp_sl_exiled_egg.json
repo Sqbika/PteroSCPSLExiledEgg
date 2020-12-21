@@ -3,21 +3,22 @@
     "meta": {
         "version": "PTDL_v1"
     },
-    "exported_at": "2020-09-16T13:10:21+02:00",
+    "exported_at": "2020-12-21T18:00:35+01:00",
     "name": "SCP:SL EXILED",
     "author": "sqbika@sqbika.win",
-    "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server with Latest EXILED",
+    "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server with option for Latest EXILED",
+    "features": null,
     "image": "quay.io\/parkervcp\/pterodactyl-images:debian_mono-5-complete",
-    "startup": ".\/LocalAdmin {{SERVER_PORT}}",
+    "startup": "mono MultiAdmin.exe --port {{SERVER_PORT}}",
     "config": {
         "files": "{\r\n    \"config_gameplay.txt\": {\r\n        \"parser\": \"yaml\",\r\n        \"find\": {\r\n            \"server_ip\": \"0.0.0.0\",\r\n            \"forward_ports\": \"false\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Waiting for players..\",\r\n    \"userInteraction\": []\r\n}",
         "logs": "{\r\n    \"custom\": false,\r\n    \"location\": \"logs\/latest.log\"\r\n}",
-        "stop": "^C"
+        "stop": "exit"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'debian:buster-slim'\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc1 ca-certificates wget\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir \/mnt\/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n#echo 'gamedir_for_configs: true' >> \/mnt\/server\/hoster_policy.txt\r\n#chmod +x \/mnt\/server\/hoster_policy.txt\r\n\r\n#URL=$(curl https:\/\/api.github.com\/repos\/Grover-c13\/MultiAdmin\/releases\/latest | grep browser_download_url | cut -d '\"' -f 4)\r\n#wget -P \/mnt\/server\/ $URL\r\n#chmod +x \/mnt\/server\/MultiAdmin.exe\r\n\r\n#SmodVersion=$(curl https:\/\/api.github.com\/repos\/Grover-c13\/Smod2\/releases\/latest | grep tag_name | cut -d '\"' -f 4)\r\n#AssemblyURL=\"https:\/\/github.com\/Grover-c13\/Smod2\/releases\/download\/${SmodVersion}\/Assembly-CSharp.dll\"\r\n#SmodURL=\"https:\/\/github.com\/Grover-c13\/Smod2\/releases\/download\/${SmodVersion}\/Smod2.dll\"\r\n#wget -O \/mnt\/server\/SCPSL_Data\/Managed\/Smod2.dll $SmodURL\r\n#wget -O \/mnt\/server\/SCPSL_Data\/Managed\/Assembly-CSharp.dll $AssemblyURL\r\n#chmod +x \/mnt\/server\/SCPSL_Data\/Managed\/Smod2.dll\r\n#chmod +x \/mnt\/server\/SCPSL_Data\/Managed\/Assembly-CSharp.dll\r\n\r\nURLMA=$(curl https:\/\/api.github.com\/repos\/ServerMod\/MultiAdmin\/releases | grep browser_download_url | cut -d '\"' -f 4 | grep MultiAdmin.exe | head -1)\r\nwget -P \/mnt\/server\/ $URLMA\r\nchmod +x \/mnt\/server\/MultiAdmin.exe\r\n\r\nURL=$(curl https:\/\/api.github.com\/repos\/galaxy119\/EXILED\/releases | grep browser_download_url | cut -d '\"' -f 4 | grep Exiled.tar.gz | head -1)\r\nwget -P \/tmp\/EXILED\/ $URL\r\ncd \/tmp\/EXILED\/\r\nmkdir \/tmp\/EXILED_out\r\ntar -C \/tmp\/EXILED_out\/ -xvf \/tmp\/EXILED\/Exiled.tar.gz\r\nmv -f \/tmp\/EXILED_out\/Assembly-CSharp.dll \/mnt\/server\/SCPSL_Data\/Managed\/\r\nmkdir -p \/mnt\/server\/.config\/EXILED\/\r\nmv -f \/tmp\/EXILED_out\/EXILED\/ \/mnt\/server\/.config\/",
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'debian:buster-slim'\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc1 ca-certificates wget\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\nif [ ${SL_BETA} ]; then\r\n    echo -e \"Using beta version of the server.\"\r\n    if [ \"${SL_BETA_NAME}\" == \"\" ]; then\r\n        echo -e \"Beta name empty, falling back to default install.\"\r\n        .\/steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir \/mnt\/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit\r\n    else\r\n        if [ \"${SL_BETA_PASS}\" == \"\" ]; then\r\n            .\/steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir \/mnt\/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} -beta ${SL_BETA_NAME} validate +quit\r\n        else\r\n            .\/steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir \/mnt\/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} -beta ${SL_BETA_NAME} -betapassword ${SL_BETA_PASS} validate +quit\r\n        fi\r\n    fi\r\nelse\r\n    .\/steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir \/mnt\/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit\r\nfi\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\nURLMA=$(curl https:\/\/api.github.com\/repos\/ServerMod\/MultiAdmin\/releases | grep browser_download_url | cut -d '\"' -f 4 | grep MultiAdmin.exe | head -1)\r\nwget -P \/mnt\/server\/ $URLMA\r\nchmod +x \/mnt\/server\/MultiAdmin.exe\r\n\r\nif [ ${USE_EXILED} ]; then\r\n    echo -e \"Using EXILED!\"\r\n    URL=$(curl https:\/\/api.github.com\/repos\/galaxy119\/EXILED\/releases | grep browser_download_url | cut -d '\"' -f 4 | grep Exiled.tar.gz | head -1)\r\n    wget -P \/tmp\/EXILED\/ $URL\r\n    cd \/tmp\/EXILED\/\r\n    mkdir \/tmp\/EXILED_out\r\n    tar -C \/tmp\/EXILED_out\/ -xvf \/tmp\/EXILED\/Exiled.tar.gz\r\n    mv -f \/tmp\/EXILED_out\/Assembly-CSharp.dll \/mnt\/server\/SCPSL_Data\/Managed\/\r\n    mkdir -p \/mnt\/server\/.config\/EXILED\/\r\n    mv -f \/tmp\/EXILED_out\/EXILED\/ \/mnt\/server\/.config\/\r\nfi",
             "container": "debian:buster-slim",
             "entrypoint": "bash"
         }
@@ -28,9 +29,45 @@
             "description": "",
             "env_variable": "SRCDS_APPID",
             "default_value": "996560",
-            "user_viewable": 1,
-            "user_editable": 0,
+            "user_viewable": true,
+            "user_editable": false,
             "rules": "required|string|max:20"
+        },
+        {
+            "name": "SCP:SL Beta",
+            "description": "Defines if the server should download a beta version of the game or not.",
+            "env_variable": "SL_BETA",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean"
+        },
+        {
+            "name": "SCP:SL Beta Name",
+            "description": "",
+            "env_variable": "SL_BETA_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|max:20"
+        },
+        {
+            "name": "SCP:SL Beta Pass",
+            "description": "",
+            "env_variable": "SL_BETA_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|max:20"
+        },
+        {
+            "name": "EXILED",
+            "description": "",
+            "env_variable": "USE_EXILED",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean"
         }
     ]
 }
